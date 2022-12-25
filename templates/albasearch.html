@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Scrapper</title>
+    <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css">
+</head>
+<body>
+    <main class="container">
+        <h1>Search Results for "{{keyword}}":</h1>
+        <a target="_blank" href="/export?keyword={{keyword}}">Export to file</a>
+        <!-- pico css -->
+        <figure> <!-- figure gives support to moblie (responsive design) -->
+            <table role="grid">
+                <thead>
+                    <tr>
+                        <th>Company</th>
+                        <th>Title</th>
+                        <th>Location</th>
+                        <th>Time</th>
+                        <th>Link</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- bracket+percent will run the python code -->
+                    {% for job in jobs %} 
+                    <tr>
+                        <td>{{job.Company}}</td>
+                        <td>{{job.Title}}</td>
+                        <td>{{job.Location}}</td>
+                        <td>{{job.Time}}</td>
+                        <td><a href="{{job.URL}}" target="_blank">Apply now &rarr;</a></td>
+                    </tr>
+                    {% endfor %} <!-- write endfor to end the python code -->
+                </tbody>
+            </table>
+        </figure>
+    </main>
+</body>
+</html>

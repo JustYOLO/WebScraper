@@ -1,6 +1,8 @@
 from flask import Flask, render_template, request, redirect, send_file
 from extractors.indeed import extract_indeed_jobs
 from extractors.wwr import extract_wwr_jobs
+from extractors.albamon import get_albamon_jobs
+from extractors.albaheaven import get_albaheaven_jobs
 from file import save_to_file
 
 app = Flask("JobScrapper")
@@ -11,8 +13,12 @@ db = {}
 def home():
     return render_template("home.html") # to use variables in html, use {{"variable"}}
 
-@app.route('/search')
-def search():
+@app.route('/webhome')
+def webhome():
+    return render_template("webhome.html")
+
+@app.route('/websearch')
+def websearch():
     keyword = request.args.get("keyword") # request.args reutrns a dic {'keyword': input}, the value will be the input 
     print(request.args)
     
@@ -26,7 +32,14 @@ def search():
         wwr = extract_wwr_jobs(keyword)
         jobs = indeed + wwr # jobs will be a list containing dics that have the job contents
         db[keyword] = jobs
-    return render_template("search.html", keyword=keyword, jobs=jobs) # {{keyword}}(double brackets) will be replaced into variable keyword
+    return render_template("websearch.html", keyword=keyword, jobs=jobs) # {{keyword}}(double brackets) will be replaced into variable keyword
+
+@app.route('/albasearch')
+def albahome():
+    albamon = get_albamon_jobs()
+    albaheaven = get_albaheaven_jobs()
+    jobs = albamon + albaheaven
+    return render_template("albasearch.html", jobs=jobs)
 
 @app.route('/export')
 def export():
@@ -34,6 +47,6 @@ def export():
     if keyword == None or keyword == "":
         return redirect("/")
     if keyword not in db:
-        return redirect(f"/search?keyword={keyword}")
+        return redirect(f"/websearch?keyword={keyword}")
     save_to_file(keyword, db[keyword])
     return send_file(f"{keyword}.csv", as_attachment=True)
