@@ -7,7 +7,7 @@
             "request": "launch",
             "module": "flask",
             "env": {
-                "FLASK_APP": "flask_web.py",
+                "FLASK_APP": "flask_job.py",
                 "FLASK_DEBUG": "1"
             },
             "args": [

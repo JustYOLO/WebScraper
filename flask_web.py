@@ -9,10 +9,10 @@ db = {}
 
 @app.route('/')
 def home():
-    return render_template("home.html", name="nico") # to use variables in html, use {{"variable"}}
+    return render_template("home.html") # to use variables in html, use {{"variable"}}
 
 @app.route('/search')
-def hello():
+def search():
     keyword = request.args.get("keyword") # request.args reutrns a dic {'keyword': input}, the value will be the input 
     print(request.args)
     
