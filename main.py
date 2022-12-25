@@ -1,39 +1,29 @@
-from flask import Flask, render_template, request, redirect, send_file
-from extractors.indeed import extract_indeed_jobs
-from extractors.wwr import extract_wwr_jobs
-from file import save_to_file
+# albamon.com WebScraper 22.12.25
+from bs4 import BeautifulSoup
+from selenium import webdriver
+from etc import linecut, strClean
 
-app = Flask("JobScrapper")
+target_url = "https://www.albamon.com/recruit/area?rArea=,1000&sDutyTerm=,10,20,30&rWDate=1"
+results = []
 
-db = {}
+browser = webdriver.Chrome()
+browser.get(target_url)
+soup = BeautifulSoup(browser.page_source, "html.parser")
+job_wrap = soup.find("div", class_="gListWrap")
+job_list = job_wrap.find("tbody")
+jobs = job_list.find_all("tr")
 
-@app.route('/')
-def home():
-    return render_template("home.html", name="nico") # to use variables in html, use {{"variable"}}
+for job in jobs:
+    area = job.select_one("div")
+    area = strClean(area.get_text(), "스크랩")  # to delete unnecessary char
+    cName = job.find("p", class_="cName")  # <cName> contains company & links
+    anchor = cName.select_one("a")
+    company = anchor.string
+    link = anchor['href']  # extract link & company
+    title = job.find("p", class_="cTit")  # cTit contains title
+    anchor = title.select_one("a")
+    title = anchor.string  # extract title
+    time = job.find_all("td")
+    time = strClean(time[-2].string)
 
-@app.route('/search')
-def hello():
-    keyword = request.args.get("keyword") # request.args reutrns a dic {'keyword': input}, the value will be the input 
-    print(request.args)
-    
-    if keyword == None or keyword == "":
-        return redirect("/")
-
-    if keyword in db:
-        jobs = db[keyword]
-    else:
-        indeed = extract_indeed_jobs(keyword)
-        wwr = extract_wwr_jobs(keyword)
-        jobs = indeed + wwr # jobs will be a list containing dics that have the job contents
-        db[keyword] = jobs
-    return render_template("search.html", keyword=keyword, jobs=jobs) # {{keyword}}(double brackets) will be replaced into variable keyword
-
-@app.route('/export')
-def export():
-    keyword = request.args.get("keyword")
-    if keyword == None or keyword == "":
-        return redirect("/")
-    if keyword not in db:
-        return redirect(f"/search?keyword={keyword}")
-    save_to_file(keyword, db[keyword])
-    return send_file(f"{keyword}.csv", as_attachment=True)
+    results.append({"Location": area, "Company": company, "link": link, "Title": title, "Time": time})
